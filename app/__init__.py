@@ -38,9 +38,9 @@ def create_app(config_name=None, overrides=None):
     # Person 4 adds:  register_cli(app)
 
     # Each person adds their blueprint name to this import and to the tuple below.
-    from .blueprints import auth, users
+    from .blueprints import auth, users, shelters, animals
 
-    for module in (auth, users):
+    for module in (auth, users, shelters, animals):
         app.register_blueprint(module.bp)
 
     @app.get("/api/v1/health")
