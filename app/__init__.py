@@ -9,14 +9,10 @@ Later pushes add their own lines where marked:
 import os
 
 from flask import Flask, jsonify
-
+from . import cache
 from .config import config_by_name
 from .errors import register_error_handlers
 from .extensions import db
-
-# Person 2 adds:  from . import cache
-# Person 4 adds:  from .cli import register_cli
-
 
 def create_app(config_name=None, overrides=None):
     config_name = config_name or os.environ.get("APP_ENV", "development")
@@ -37,7 +33,7 @@ def create_app(config_name=None, overrides=None):
     from . import models  # noqa: F401  (register tables on metadata)
 
     db.init_app(app)
-    # Person 2 adds:  cache.init_app(app)
+    cache.init_app(app)
     register_error_handlers(app)
     # Person 4 adds:  register_cli(app)
 
