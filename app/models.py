@@ -101,6 +101,7 @@ class Animal(db.Model):
 
     shelter = db.relationship("Shelter", back_populates="animals")
     applications = db.relationship("AdoptionApplication", back_populates="animal")
+    medical_records = db.relationship("MedicalRecord", back_populates="animal", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -115,6 +116,33 @@ class Animal(db.Model):
             "status": self.status,
             "created_at": iso(self.created_at),
             "updated_at": iso(self.updated_at),
+        }
+
+class MedicalRecord(db.Model):
+    __tablename__ = "medical_records"
+    __table_args__ = (db.Index("ix_medical_animal_date", "animal_id", "administered_on"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey("animals.id", ondelete="CASCADE"), nullable=False)
+    record_type = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    administered_on = db.Column(db.Date, nullable=False)
+    notes = db.Column(db.Text)
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"))
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
+
+    animal = db.relationship("Animal", back_populates="medical_records")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "animal_id": self.animal_id,
+            "record_type": self.record_type,
+            "description": self.description,
+            "administered_on": self.administered_on.isoformat(),
+            "notes": self.notes,
+            "created_by": self.created_by,
+            "created_at": iso(self.created_at),
         }
 
 
