@@ -100,6 +100,7 @@ class Animal(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     shelter = db.relationship("Shelter", back_populates="animals")
+    applications = db.relationship("AdoptionApplication", back_populates="animal")
 
     def to_dict(self):
         return {
@@ -112,6 +113,52 @@ class Animal(db.Model):
             "sex": self.sex,
             "description": self.description,
             "status": self.status,
+            "created_at": iso(self.created_at),
+            "updated_at": iso(self.updated_at),
+        }
+
+
+class AdoptionApplication(db.Model):
+    __tablename__ = "adoption_applications"
+    __table_args__ = (
+        db.Index("ix_apps_animal_status", "animal_id", "status"),
+        db.Index("ix_apps_applicant", "applicant_id", "created_at"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(
+        db.Integer, db.ForeignKey("animals.id", ondelete="CASCADE"), nullable=False
+    )
+    applicant_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    applicant_name = db.Column(db.String(120), nullable=False)
+    applicant_email = db.Column(db.String(255), nullable=False)
+    applicant_phone = db.Column(db.String(30))
+    message = db.Column(db.Text)
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    decision_note = db.Column(db.String(500))
+    decided_by = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"))
+    decided_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
+
+    animal = db.relationship("Animal", back_populates="applications")
+    applicant = db.relationship("User", foreign_keys=[applicant_id])
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "animal_id": self.animal_id,
+            "applicant_id": self.applicant_id,
+            "applicant_name": self.applicant_name,
+            "applicant_email": self.applicant_email,
+            "applicant_phone": self.applicant_phone,
+            "message": self.message,
+            "status": self.status,
+            "decision_note": self.decision_note,
+            "decided_by": self.decided_by,
+            "decided_at": iso(self.decided_at),
             "created_at": iso(self.created_at),
             "updated_at": iso(self.updated_at),
         }
