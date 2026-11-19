@@ -9,10 +9,12 @@ Later pushes add their own lines where marked:
 import os
 
 from flask import Flask, jsonify
+
 from . import cache
 from .config import config_by_name
 from .errors import register_error_handlers
 from .extensions import db
+from .cli import register_cli
 
 def create_app(config_name=None, overrides=None):
     config_name = config_name or os.environ.get("APP_ENV", "development")
@@ -35,7 +37,8 @@ def create_app(config_name=None, overrides=None):
     db.init_app(app)
     cache.init_app(app)
     register_error_handlers(app)
-    # Person 4 adds:  register_cli(app)
+    register_cli(app)
+
 
     # Each person adds their blueprint name to this import and to the tuple below.
     from .blueprints import auth, users, applications
