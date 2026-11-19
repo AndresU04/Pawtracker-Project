@@ -41,6 +41,9 @@ def create_app(config_name=None, overrides=None):
     from .blueprints import auth, users, shelters, animals
 
     for module in (auth, users, shelters, animals):
+    from .blueprints import auth, users, applications
+
+    for module in (auth, users, applications):
         app.register_blueprint(module.bp)
 
     @app.get("/api/v1/health")
